@@ -1,2 +1,1 @@
-#MED
-Testing
+# MED
