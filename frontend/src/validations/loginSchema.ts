@@ -7,6 +7,12 @@ export interface Country {
   dialCode: string;
 }
 
+// Helper function to validate Bolivian phone numbers
+const isValidBolivianPhoneNumber = (phone: string) => {
+  // Bolivian phone numbers are 8 digits long
+  return /^[67]\d{7}$/.test(phone);
+};
+
 const loginSchema = yup.object({
   country: yup.object({
     code: yup.string().required('Selecciona un país'),
@@ -17,8 +23,18 @@ const loginSchema = yup.object({
   phoneNumber: yup.string()
     .required('Ingresa tu número de teléfono')
     .matches(/^\d+$/, 'Solo números permitidos')
-    .min(8, 'Número muy corto')
-    .max(15, 'Número muy largo'),
+    .test('is-valid-phone', 'Número de teléfono inválido', function(value) {
+      if (!value) return false;
+      const country = this.parent.country;
+      
+      // Special validation for Bolivian numbers
+      if (country.code === 'BO') {
+        return isValidBolivianPhoneNumber(value);
+      }
+      
+      // General validation for other countries
+      return value.length >= 8 && value.length <= 15;
+    }),
   password: yup.string()
     .required('Ingresa tu contraseña'),
 }).required();

@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import History from './pages/History';
 import Settings from './pages/Settings';
 import Login from './pages/Login';
+import RegisterPage from './pages/Register'; // Importar RegisterPage
 import MedicalHistory from './pages/MedicalHistory';
 import AIAnalysis from './pages/AIAnalysis';
 import Appointments from './pages/Appointments';
@@ -19,6 +20,7 @@ export default function App() {
         <Routes>
           {/* Ruta pública */}
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<RegisterPage />} /> {/* Añadir esta ruta */}
 
           {/* Rutas protegidas para todos los usuarios autenticados */}
           <Route element={<RoleBasedRoutes allowedRoles={['patient', 'doctor', 'admin']} />}>

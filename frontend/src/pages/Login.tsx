@@ -15,7 +15,8 @@ import {
   Alert,
   Link,
   Autocomplete,
-  CircularProgress
+  CircularProgress,
+  TextFieldProps
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -34,10 +35,10 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { control, handleSubmit, formState: { errors }, watch, getValues } = useForm<LoginFormData>({
+  const { control, handleSubmit, formState: { errors }, getValues } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
     defaultValues: {
-      country: SUPPORTED_COUNTRIES[0], // Bolivia by default
+      country: SUPPORTED_COUNTRIES[0],
       phoneNumber: '',
       password: ''
     }
@@ -57,23 +58,28 @@ export default function Login() {
     setError(null);
     try {
       const fullPhoneNumber = `${data.country.dialCode}${data.phoneNumber}`;
+      console.log('Attempting login with:', { fullPhoneNumber });
+      
       const response = await authService.login(fullPhoneNumber, data.password);
+      console.log('Login response:', response);
       
       if (!response.success) {
-        throw new Error(response.message);
+        throw new Error(response.message || 'Error en el inicio de sesión');
       }
 
       // Login successful
       if (!response.data) {
         throw new Error('Respuesta inválida del servidor');
       }
+      
       const { phoneNumber, role, username } = response.data;
       localStorage.setItem('userPhone', phoneNumber || '');
       localStorage.setItem('userRole', role || '');
       localStorage.setItem('username', username || '');
       navigate('/');
     } catch (error: any) {
-      setError(error.message);
+      console.error('Login error:', error);
+      setError(error.message || 'Error en el inicio de sesión');
     } finally {
       setIsLoading(false);
     }
@@ -146,13 +152,22 @@ export default function Login() {
               <Controller
                 name="country"
                 control={control}
-                render={({ field }) => (
+                defaultValue={SUPPORTED_COUNTRIES[0]}
+                render={({ field: { onChange, value } }) => (
                   <Autocomplete
-                    {...field}
+                    value={value}
                     options={SUPPORTED_COUNTRIES}
                     getOptionLabel={(option) => `${option.name} (${option.dialCode})`}
+                    isOptionEqualToValue={(option, value) => 
+                      option?.code === value?.code
+                    }
+                    onChange={(_, newValue) => onChange(newValue)}
                     renderOption={(props, option) => (
-                      <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
+                      <Box 
+                        component="li" 
+                        sx={{ '& > img': { mr: 2, flexShrink: 0 } }} 
+                        {...props}
+                      >
                         <ReactCountryFlag
                           countryCode={option.code}
                           svg
@@ -161,7 +176,7 @@ export default function Login() {
                         {option.name} ({option.dialCode})
                       </Box>
                     )}
-                    renderInput={(params) => (
+                    renderInput={(params: TextFieldProps) => (
                       <TextField
                         {...params}
                         label="País"
@@ -170,7 +185,6 @@ export default function Login() {
                         fullWidth
                       />
                     )}
-                    onChange={(_, data) => field.onChange(data)}
                   />
                 )}
               />
@@ -189,7 +203,7 @@ export default function Login() {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            {watch('country')?.dialCode}
+                            {getValues('country')?.dialCode}
                           </InputAdornment>
                         ),
                       }}

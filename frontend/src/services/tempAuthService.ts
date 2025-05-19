@@ -15,7 +15,7 @@ export interface AuthResponse {
 interface RegisterData {
   firstName: string;
   lastName: string;
-  email?: string;
+  email: string;
   phone: string;
   password: string;
   role: 'patient' | 'doctor';
@@ -43,7 +43,6 @@ class AuthService {
 
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
-      console.log('Sending registration data:', userData);
       const response = await fetch(AUTH_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: {
@@ -51,19 +50,12 @@ class AuthService {
         },
         body: JSON.stringify(userData),
       });
-      
       const data = await response.json();
-      console.log('Registration response:', data);
-      
       if (!response.ok) {
-        throw new Error(data.error || data.message || 'Error en el registro');
+        throw new Error(data.message || 'Error en el registro');
       }
       return data;
-    } catch (error: any) {
-      console.error('Registration error:', error);
-      if (error instanceof Error) {
-        throw error;
-      }
+    } catch (error) {
       throw new Error('Error al conectar con el servidor');
     }
   }

@@ -5,7 +5,9 @@ export const APP_CONFIG = {
 
 export const AUTH_ENDPOINTS = {
   LOGIN: `${APP_CONFIG.API_BASE_URL}/auth/login`,
+  REGISTER: `${APP_CONFIG.API_BASE_URL}/auth/register`,
   RESET_PASSWORD: `${APP_CONFIG.API_BASE_URL}/auth/reset-password`,
+  RESET_PASSWORD_CONFIRM: `${APP_CONFIG.API_BASE_URL}/auth/reset-password-confirm`,
   VERIFY_CODE: `${APP_CONFIG.API_BASE_URL}/auth/verify-code`
 } as const;
 
